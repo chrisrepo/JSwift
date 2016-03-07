@@ -8,5 +8,7 @@
 
 import Foundation
 
-
+import Foundation
+var json = JSwift(fromFilePath: "/Users/crepanich23/Desktop/JSwift/JSwift/JSwift/json.txt")
+print(json.jsonContents)
 
