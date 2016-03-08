@@ -16,10 +16,17 @@ let JSON_CLOSE_BRACKET_TOKEN : Character = "]"
 let JSON_COMMA_TOKEN : Character = ","
 let JSON_COLON_TOKEN : Character = ":"
 
-public struct JSwift {
+class JSwift {
     var val: Dictionary<String, Any>
     var jsonContents: String
     var index: Int
+    
+    init(fromString string: String) {
+        val = Dictionary<String, Any>()
+        index = 0
+        jsonContents = string
+        buildJSON(string)
+    }
     
     init(fromFilePath path: String) {
         val = Dictionary<String, Any>()
@@ -46,7 +53,7 @@ public struct JSwift {
         }
     }
     
-    mutating func buildJSON(var json: String) {
+    func buildJSON(var json: String) {
         //remove any extra spaces to make parsing easier
         json = json.stringByReplacingOccurrencesOfString("\t", withString: "")
         json = json.stringByReplacingOccurrencesOfString("\n", withString: "")
@@ -54,7 +61,7 @@ public struct JSwift {
         val = parseObject(json)
     }
     
-    mutating func parseObject(json: String)->Dictionary<String, Any> {
+    func parseObject(json: String)->Dictionary<String, Any> {
         var ret = Dictionary<String,Any>()
         var token = nextToken(json)
         //go through each value in this object
@@ -82,7 +89,7 @@ public struct JSwift {
         }
     }
     
-    mutating func parseArray(json: String)->[Any] {
+    func parseArray(json: String)->[Any] {
         var ret = [Any]()
         while true {
             let temp = parseObject(json)
@@ -94,7 +101,7 @@ public struct JSwift {
         return ret
     }
     
-    mutating func parseValue(json: String)->Any {
+    func parseValue(json: String)->Any {
         var token = nextToken(json)
         if token == JSON_OPEN_BRACE_TOKEN {
             return parseObject(json)
@@ -135,7 +142,7 @@ public struct JSwift {
             }
         }
     }
-    mutating func parseString(json: String)->String {
+    func parseString(json: String)->String {
         var name = ""
         var next = nextToken(json)
         while next != JSON_QUOTE_TOKEN {
@@ -145,7 +152,7 @@ public struct JSwift {
         return name
     }
 
-    mutating func nextToken(json: String)->Character {
+    func nextToken(json: String)->Character {
         self.index++
         return json[json.startIndex.advancedBy(self.index)]
     }
