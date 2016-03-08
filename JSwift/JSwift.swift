@@ -16,13 +16,13 @@ let JSON_CLOSE_BRACKET_TOKEN : Character = "]"
 let JSON_COMMA_TOKEN : Character = ","
 let JSON_COLON_TOKEN : Character = ":"
 
-class JSwift {
-    var topDict: Dictionary<String, Any>
+public struct JSwift {
+    var val: Dictionary<String, Any>
     var jsonContents: String
     var index: Int
     
     init(fromFilePath path: String) {
-        topDict = Dictionary<String, Any>()
+        val = Dictionary<String, Any>()
         jsonContents = ""
         index = 0
         //let filemgr = NSFileManager.defaultManager()
@@ -34,31 +34,31 @@ class JSwift {
         }
         
     }
+    
     subscript(key: String)->Any {
         get {
             //return object at key
-            return topDict[key]
+            return val[key]
         }
         set (newValue) {
             //set new value
-            topDict[key] = newValue
+            val[key] = newValue
         }
     }
     
-    func buildJSON(var json: String) {
+    mutating func buildJSON(var json: String) {
         //remove any extra spaces to make parsing easier
         json = json.stringByReplacingOccurrencesOfString("\t", withString: "")
         json = json.stringByReplacingOccurrencesOfString("\n", withString: "")
         
-        topDict = parseObject(json)
+        val = parseObject(json)
     }
     
-    func parseObject(json: String)->Dictionary<String, Any> {
+    mutating func parseObject(json: String)->Dictionary<String, Any> {
         var ret = Dictionary<String,Any>()
         var token = nextToken(json)
-        var done = false
         //go through each value in this object
-        while !done {
+        while true {
             //empty object
             if token == JSON_CLOSE_BRACE_TOKEN || token == JSON_CLOSE_BRACKET_TOKEN {
                 return ret
@@ -82,7 +82,7 @@ class JSwift {
         }
     }
     
-    func parseArray(json: String)->[Any] {
+    mutating func parseArray(json: String)->[Any] {
         var ret = [Any]()
         while true {
             let temp = parseObject(json)
@@ -94,7 +94,7 @@ class JSwift {
         return ret
     }
     
-    func parseValue(json: String)->Any {
+    mutating func parseValue(json: String)->Any {
         var token = nextToken(json)
         if token == JSON_OPEN_BRACE_TOKEN {
             return parseObject(json)
@@ -109,12 +109,17 @@ class JSwift {
                 if token >= "0" || token <= "9" {
                     //is digit, handle accordingly
                     var value = ""
+                    var isInt = true
                     while token != JSON_CLOSE_BRACE_TOKEN && token != JSON_CLOSE_BRACKET_TOKEN && token != JSON_COMMA_TOKEN {
                         value.append(token)
+                        if token == "." {
+                            isInt = false
+                        }
                         token = nextToken(json)
                     }
                     //backtrack one (from while check)
                     self.index--
+                    if isInt {return Int(value)}
                     return Double(value)
                 } else {
                     //is true, false, or null
@@ -130,8 +135,7 @@ class JSwift {
             }
         }
     }
-    
-    func parseString(json: String)->String {
+    mutating func parseString(json: String)->String {
         var name = ""
         var next = nextToken(json)
         while next != JSON_QUOTE_TOKEN {
@@ -141,27 +145,9 @@ class JSwift {
         return name
     }
 
-    func nextToken(json: String)->Character {
+    mutating func nextToken(json: String)->Character {
         self.index++
         return json[json.startIndex.advancedBy(self.index)]
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
 }
